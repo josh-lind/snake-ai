@@ -5,8 +5,8 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    const width = 20;
-    const height = 20;
+    const width = 10;
+    const height = 10;
 
     var matrix = Array(height).fill().map(() => Array(width).fill(0));
 
@@ -19,10 +19,140 @@ class App extends React.Component {
       boardWidth: width,
       boardHeight: height,
       timer: null,
-      gameSpeed: 200,
+      gameSpeed: 50,
       openBorders: false,
-      maxScore: 0
+      maxScore: 0,
+      hamCycle: [],
+      aiRunning: false
     };
+  }
+
+  buildHamCycle() {
+    let cycle = [0];
+    for (let row = 0; row < this.state.boardHeight; row++) {
+      if (row % 2 === 0) {
+        for (let col = 1; col < this.state.boardWidth; col++) {
+          cycle.push(row * this.state.boardWidth + col);
+        }
+      } else {
+        for (let col = this.state.boardWidth - 1; col > 0; col--) {
+          cycle.push(row * this.state.boardWidth + col);
+        }
+      }
+    }
+    for (let row = this.state.boardHeight - 1; row > 0; row--) {
+      cycle.push(row * this.state.boardWidth);
+    }
+    console.log(cycle);
+    return cycle;
+  }
+
+  getCycleDistance(dir) {
+    const totalBoardSize = this.state.boardWidth * this.state.boardHeight;
+    const newSpot = this.getNewPosition(this.state.currentHead, dir);
+    // const oldHamIndex = this.state.hamCycle.indexOf(this.state.currentHead);
+    const hamFoodIndex = this.state.hamCycle.indexOf(this.state.foodLoc);
+
+    if (newSpot > -1 && newSpot < totalBoardSize) {
+      const newSpotHamIndex = this.state.hamCycle.indexOf(newSpot);
+      let isValidMove = true;
+      for (let i = 0; i < this.state.snakeQueue.length; i++) {
+        // This for loop checks if this move would doom the snake
+        const hamIndexToCheck = (newSpotHamIndex + i) % totalBoardSize;
+        const tileToCheck = this.state.hamCycle[hamIndexToCheck];
+        const snakeToCheck = this.state.snakeQueue.slice(0, i + 1);
+        if (snakeToCheck.includes(tileToCheck)) {
+          isValidMove = false;
+          break;
+        }
+      }
+      // for (let i = oldHamIndex + 1; i <= newSpotHamIndex; i++) {
+      //   // This for loop checks if this move would skip over any part of the snake
+      //   const tilePos = this.state.hamCycle[i];
+      //   const tileVal = this.state.currentMat[this.getRow(tilePos)][this.getCol(tilePos)];
+      //   if (tileVal === 1) {
+      //     isValidMove = false;
+      //     break;
+      //   }
+      // }
+      if (isValidMove) {
+        // At this point we want to return foodDist
+        const foodDist = (hamFoodIndex - newSpotHamIndex + totalBoardSize) % totalBoardSize;
+        return foodDist;
+      }
+    }
+    return totalBoardSize;
+  }
+
+  getNextDirection() {
+    const totalBoardSize = this.state.boardWidth * this.state.boardHeight;
+    const currentDir = this.state.headDirection;
+
+    let minDist = totalBoardSize;
+    let bestDir;
+
+    if (currentDir !== 'down') {
+      const upDist = this.getCycleDistance('up');
+      if (upDist < minDist) {
+        minDist = upDist;
+        bestDir = 'up';
+      }
+    }
+    
+    if (currentDir !== 'left') {
+      const upDist = this.getCycleDistance('right');
+      if (upDist < minDist) {
+        minDist = upDist;
+        bestDir = 'right';
+      }
+    }
+
+    if (currentDir !== 'up') {
+      const upDist = this.getCycleDistance('down');
+      if (upDist < minDist) {
+        minDist = upDist;
+        bestDir = 'down';
+      }
+    }
+
+    if (currentDir !== 'right') {
+      const upDist = this.getCycleDistance('left');
+      if (upDist < minDist) {
+        minDist = upDist;
+        bestDir = 'left';
+      }
+    }
+
+    return bestDir;
+
+    // const oldHead = this.state.currentHead;
+    // const oldHamIndex = this.state.hamCycle.indexOf(oldHead);
+    // const foodPos = this.state.foodLoc;
+    // const hamFoodIndex = this.state.hamCycle.indexOf(foodPos);
+
+    // const nextPos = this.state.hamCycle[(oldHamIndex + 1) % totalBoardSize];
+
+    // if (this.getNewPosition(oldHead, 'up') === nextPos) {
+    //   return 'up';
+    // }
+    // if (this.getNewPosition(oldHead, 'right') === nextPos) {
+    //   return 'right';
+    // }
+    // if (this.getNewPosition(oldHead, 'down') === nextPos) {
+    //   return 'down';
+    // }
+    // if (this.getNewPosition(oldHead, 'left') === nextPos) {
+    //   return 'left';
+    // }
+  }
+
+  onRunAI() {
+    const cycle = this.buildHamCycle();
+    this.setState({
+      hamCycle: cycle,
+      aiRunning: true
+    });
+    this.onStart();
   }
 
   componentDidMount() {
@@ -96,7 +226,7 @@ class App extends React.Component {
     clearInterval(this.state.timer);
     this.setState({
       timer: null,
-      currentMat: Array(this.state.boardHeight).fill().map(() => Array(this.state.boardWidth).fill(0))
+      // currentMat: Array(this.state.boardHeight).fill().map(() => Array(this.state.boardWidth).fill(0))
     });
   }
 
@@ -108,9 +238,15 @@ class App extends React.Component {
   }
 
   moveSnake() {
-    const newHead = this.getNewPosition(this.state.currentHead, this.state.headDirection);
+    let direction = this.state.headDirection;
+    if (this.state.aiRunning) {
+      direction = this.getNextDirection();
+    }
+
+    const nextPos = this.getNewPosition(this.state.currentHead, direction);
     // End if new head is off the board
-    if (newHead < 0 || newHead >= this.state.boardWidth * this.state.boardHeight) {
+    if (nextPos < 0 || nextPos >= this.state.boardWidth * this.state.boardHeight) {
+      console.log('off board')
       this.gameOver();
       return;
     }
@@ -120,29 +256,34 @@ class App extends React.Component {
     var snake = this.state.snakeQueue.slice();
     // Check if food consumed
     var newFoodLoc = this.state.foodLoc;
-    if (this.state.foodLoc === newHead) {
+    if (this.state.foodLoc === nextPos) {
       // Snake ate food
-      newMatrix[this.getRow(newHead)][this.getCol(newHead)] = 1;
-      snake.push(newHead);
+      newMatrix[this.getRow(nextPos)][this.getCol(nextPos)] = 1;
+      snake.push(nextPos);
       newFoodLoc = this.getRandomFoodLoc(snake);
       newMatrix[this.getRow(newFoodLoc)][this.getCol(newFoodLoc)] = 2;
-    } else if (newMatrix[this.getRow(newHead)][this.getCol(newHead)] === 1) {
+    } else if (newMatrix[this.getRow(nextPos)][this.getCol(nextPos)] === 1) {
       // Snake ran into itself
+      console.log('ran into self');
+      console.log(this.state);
+      console.log(direction);
+      console.log(nextPos);
       this.gameOver();
       return;
     } else {
       // Snake went into a legal, empty space
       const snakeEnd = snake.shift();
       newMatrix[this.getRow(snakeEnd)][this.getCol(snakeEnd)] = 0;
-      snake.push(newHead);
-      newMatrix[this.getRow(newHead)][this.getCol(newHead)] = 1;
+      snake.push(nextPos);
+      newMatrix[this.getRow(nextPos)][this.getCol(nextPos)] = 1;
     }
 
     this.setState({
-      currentHead: newHead,
+      currentHead: nextPos,
       snakeQueue: snake,
       foodLoc: newFoodLoc,
-      currentMat: newMatrix
+      currentMat: newMatrix,
+      headDirection: direction
     });
   }
 
@@ -241,6 +382,7 @@ class App extends React.Component {
             <button className="StartButton ButtonSpace" onClick={() => this.onStart()}>Start</button>
             <button className="StopButton ButtonSpace" onClick={() => this.onStop()}>Stop</button>
             <button className="BorderRule ButtonSpace" onClick={() => this.onBorderRule()}>{this.state.openBorders ? 'Open Borders' : 'Closed Borders'}</button>
+            <button className="BorderRule ButtonSpace" onClick={() => this.onRunAI()}>Run AI</button>
           </div>
           <div className="Buttons">
             Max Score: {this.state.maxScore}
