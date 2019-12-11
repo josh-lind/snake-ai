@@ -1,0 +1,142 @@
+.App {
+  text-align: center;
+  flex-direction: column;
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #09d3ac;
+}
+
+.Title {
+  display: flex;
+  margin-bottom: 2em;
+}
+
+.GameBoard {
+  width: 500px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  border: solid 5px #ddd;
+  padding-bottom: 2px;
+}
+
+.GridRow {
+  display: flex;
+  height: 100%;
+	flex-direction: row;
+}
+
+.GridBox0, .GridBox1, .GridBox2 {
+	display: flex;
+	width: 100%;
+  height: 100%;
+  background: #282c34;
+  border: 1px solid #444;
+}
+
+.GridBox1 {
+  background: #5cbf2a;
+}
+
+.GridBox2 {
+  background: #dc1b1b;
+}
+
+.Buttons {
+  display: flex;
+  margin-top: 2em;
+  flex-direction: row;
+}
+
+.ButtonSpace {
+  margin: 0 1em;
+}
+
+.StartButton {
+	box-shadow:inset 0px 1px 0px 0px #a4e271;
+	background:linear-gradient(to bottom, #89c403 5%, #77a809 100%);
+	background-color:#89c403;
+	border-radius:6px;
+	border:1px solid #74b807;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #528009;
+}
+.StartButton:hover {
+	background:linear-gradient(to bottom, #77a809 5%, #89c403 100%);
+	background-color:#77a809;
+}
+.StartButton:active {
+	position:relative;
+	top:1px;
+}
+
+
+.StopButton {
+	box-shadow:inset 0px 1px 0px 0px #f5978e;
+	background:linear-gradient(to bottom, #f24537 5%, #c62d1f 100%);
+	background-color:#f24537;
+	border-radius:6px;
+	border:1px solid #d02718;
+	display:inline-block;
+	cursor:pointer;
+	color:#ffffff;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #810e05;
+}
+.StopButton:hover {
+	background:linear-gradient(to bottom, #c62d1f 5%, #f24537 100%);
+	background-color:#c62d1f;
+}
+.StopButton:active {
+	position:relative;
+	top:1px;
+}
+
+
+.BorderRule {
+	box-shadow:inset 0px 1px 0px 0px #ffffff;
+	background:linear-gradient(to bottom, #ffffff 5%, #f6f6f6 100%);
+	background-color:#ffffff;
+	border-radius:6px;
+	border:1px solid #dcdcdc;
+	display:inline-block;
+	cursor:pointer;
+	color:#666666;
+	font-family:Arial;
+	font-size:15px;
+	font-weight:bold;
+	padding:6px 24px;
+	text-decoration:none;
+	text-shadow:0px 1px 0px #ffffff;
+}
+.BorderRule:hover {
+	background:linear-gradient(to bottom, #f6f6f6 5%, #ffffff 100%);
+	background-color:#f6f6f6;
+}
+.BorderRule:active {
+	position:relative;
+	top:1px;
+}
