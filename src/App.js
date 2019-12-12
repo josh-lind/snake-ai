@@ -246,6 +246,26 @@ class App extends React.Component {
     });
   }
 
+  onSizeChange(e) {
+    const newSize = 24;
+    // const newSize = e.target.value;
+    console.log('onSizeChange', newSize);
+    const isValid = newSize % 2 === 0 && newSize > 0;
+    console.log(isValid);
+
+    const newMatrix = Array(newSize).fill().map(() => Array(newSize).fill(0));
+    console.log(newMatrix);
+
+    if (isValid) {
+      this.onStop();
+      this.setState({
+        boardHeight: newSize,
+        boardWidth: newSize,
+        currentMat: newMatrix
+      });
+    }
+  }
+
   moveSnake() {
     let direction = this.state.headDirection;
     if (this.state.aiRunning) {
@@ -400,6 +420,12 @@ class App extends React.Component {
             <button className="StopButton ButtonSpace" onClick={() => this.onStop()}>Stop</button>
             <button className="BorderRule ButtonSpace" onClick={() => this.onBorderRule()}>{this.state.openBorders ? 'Open Borders' : 'Closed Borders'}</button>
             <button className="BorderRule ButtonSpace" onClick={() => this.onRunAI()}>Run AI</button>
+          </div>
+          <div className="Buttons">
+            <label>
+              Board Size (Even Numbers Only)
+              <input type="number" name="inputBoardSize" onChange={(e) => this.onSizeChange(e)} />
+            </label>
           </div>
           <div className="Buttons">
             Max Score: {this.state.maxScore}
