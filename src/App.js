@@ -5,10 +5,9 @@ class App extends React.Component {
   constructor(props) {
     super(props);
 
-    const width = 10;
-    const height = 10;
+    const boardSize = 10;
 
-    var matrix = Array(height).fill().map(() => Array(width).fill(0));
+    var matrix = Array(boardSize).fill().map(() => Array(boardSize).fill(0));
 
     this.state = {
       currentMat: matrix,
@@ -16,10 +15,10 @@ class App extends React.Component {
       headDirection: null,
       snakeQueue: [],
       foodLoc: 0,
-      boardWidth: width,
-      boardHeight: height,
+      boardWidth: boardSize,
+      boardHeight: boardSize,
       timer: null,
-      gameSpeed: 50,
+      gameSpeed: 30,
       openBorders: false,
       maxScore: 0,
       hamCycle: [],
@@ -50,7 +49,6 @@ class App extends React.Component {
   getCycleDistance(dir) {
     const totalBoardSize = this.state.boardWidth * this.state.boardHeight;
     const newSpot = this.getNewPosition(this.state.currentHead, dir);
-    // const oldHamIndex = this.state.hamCycle.indexOf(this.state.currentHead);
     const hamFoodIndex = this.state.hamCycle.indexOf(this.state.foodLoc);
 
     if (newSpot > -1 && newSpot < totalBoardSize) {
@@ -62,8 +60,7 @@ class App extends React.Component {
         const hamIndexToCheck = (newSpotHamIndex + i) % totalBoardSize;
         const tileToCheck = this.state.hamCycle[hamIndexToCheck];
         const snakeToCheck = this.state.snakeQueue.slice(i < expectedFoodPadding ? 0 : i - expectedFoodPadding);
-        // console.log(tileToCheck);
-        // console.log(snakeToCheck);
+
         if (snakeToCheck.includes(tileToCheck)) {
           isValidMove = false;
           break;
@@ -72,11 +69,9 @@ class App extends React.Component {
       if (isValidMove) {
         // At this point we want to return foodDist
         const foodDist = (hamFoodIndex - newSpotHamIndex + totalBoardSize) % totalBoardSize;
-        // console.log(foodDist, dir);
         return foodDist;
       }
     }
-    // console.log(totalBoardSize, dir);
     return totalBoardSize;
   }
 
@@ -108,8 +103,8 @@ class App extends React.Component {
     let minDist = totalBoardSize;
     let bestDir;
 
-    console.log('getNextDirection');
-    console.log(this.state);
+    // console.log('getNextDirection');
+    // console.log(this.state);
 
     if (currentDir !== 'down') {
       const upDist = this.getCycleDistance('up');
@@ -143,7 +138,7 @@ class App extends React.Component {
       }
     }
 
-    console.log('bestDir', bestDir);
+    // console.log('bestDir', bestDir);
 
     if (!bestDir) {
       bestDir = this.getDirectionToFollowHamCycle();
@@ -160,7 +155,7 @@ class App extends React.Component {
       hamCycle: cycle,
       aiRunning: true
     });
-    this.onStart();
+    this.startGame();
   }
 
   componentDidMount() {
@@ -207,10 +202,9 @@ class App extends React.Component {
       });
       this.moveSnake();
     }
-
   }
 
-  onStart() {
+  startGame() {
     var newMat = Array(this.state.boardHeight).fill().map(() => Array(this.state.boardWidth).fill(0));
     newMat[0][0] = 1;
     newMat[0][1] = 1;
@@ -228,6 +222,13 @@ class App extends React.Component {
       foodLoc: newFoodLoc,
       currentMat: newMat
     });
+  }
+
+  onStart() {
+    this.setState({
+      aiRunning: false
+    });
+    this.startGame();
   }
 
   onStop() {
@@ -269,6 +270,11 @@ class App extends React.Component {
       newMatrix[this.getRow(nextPos)][this.getCol(nextPos)] = 1;
       snake.push(nextPos);
       newFoodLoc = this.getRandomFoodLoc(snake);
+      if (!newFoodLoc) {
+        // Getting to this point means the game has been won
+        this.gameOver();
+        return;
+      }
       newMatrix[this.getRow(newFoodLoc)][this.getCol(newFoodLoc)] = 2;
     } else if (newMatrix[this.getRow(nextPos)][this.getCol(nextPos)] === 1) {
       // Snake ran into itself
@@ -349,7 +355,6 @@ class App extends React.Component {
     if (direction === 'up') {
       const onEdge = oldPos - width < 0;
       if (onEdge && this.state.openBorders) {
-        console.log(oldPos + ((this.state.boardHeight - 1) * width));
         return oldPos + ((this.state.boardHeight - 1) * width);
       }
       return oldPos - width;
