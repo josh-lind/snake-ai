@@ -18,7 +18,7 @@ class App extends React.Component {
       boardWidth: boardSize,
       boardHeight: boardSize,
       timer: null,
-      gameSpeed: 30,
+      gameSpeed: 300,
       openBorders: false,
       maxScore: 0,
       hamCycle: [],
@@ -247,22 +247,44 @@ class App extends React.Component {
   }
 
   onSizeChange(e) {
-    const newSize = 24;
-    // const newSize = e.target.value;
+    const newSize = parseInt(e.target.value);
     console.log('onSizeChange', newSize);
-    const isValid = newSize % 2 === 0 && newSize > 0;
+    // IsValid makes sure the value is an even number
+    const isValid = newSize % 2 === 0 && newSize > 0 && newSize < 60;
     console.log(isValid);
 
-    const newMatrix = Array(newSize).fill().map(() => Array(newSize).fill(0));
-    console.log(newMatrix);
-
     if (isValid) {
+      const newMatrix = Array(newSize).fill().map(() => Array(newSize).fill(0));
+      console.log(newMatrix);
       this.onStop();
       this.setState({
         boardHeight: newSize,
         boardWidth: newSize,
         currentMat: newMatrix
       });
+    }
+  }
+
+  onSpeedChange(e) {
+    const newSpeed = parseInt(e.target.value);
+    console.log('onSpeedChange', newSpeed);
+    // Ensure new speed is reasonable
+    const isValid = newSpeed > 0 && newSpeed < 3000;
+    console.log(isValid);
+
+    if (isValid) {
+      if (this.state.timer) {
+        clearInterval(this.state.timer);
+        this.setState({
+          gameSpeed: newSpeed,
+          timer: setInterval(() => this.moveSnake(), newSpeed)
+        });
+      } else {
+        this.setState({
+          gameSpeed: newSpeed
+        });
+      }
+
     }
   }
 
@@ -290,8 +312,9 @@ class App extends React.Component {
       newMatrix[this.getRow(nextPos)][this.getCol(nextPos)] = 1;
       snake.push(nextPos);
       newFoodLoc = this.getRandomFoodLoc(snake);
-      if (!newFoodLoc) {
+      if (newFoodLoc === undefined) {
         // Getting to this point means the game has been won
+        console.log('No spot to put food.');
         this.gameOver();
         return;
       }
@@ -322,6 +345,7 @@ class App extends React.Component {
   }
 
   gameOver() {
+    console.log(this.state);
     console.log('gameOver');
     const score = this.state.snakeQueue.length;
     if (score > this.state.maxScore) {
@@ -422,10 +446,18 @@ class App extends React.Component {
             <button className="BorderRule ButtonSpace" onClick={() => this.onRunAI()}>Run AI</button>
           </div>
           <div className="Buttons">
-            <label>
-              Board Size (Even Numbers Only)
-              <input type="number" name="inputBoardSize" onChange={(e) => this.onSizeChange(e)} />
-            </label>
+            <div className="LabelAndInput">
+              <label>
+                Board Size (Even Number)
+              </label>
+              <input type="number" name="inputBoardSize" placeholder={this.state.boardWidth} onChange={(e) => this.onSizeChange(e)} />
+            </div>
+            <div className="LabelAndInput">
+              <label>
+                Game Speed (ms)
+              </label>
+              <input type="number" name="gameSpeed" placeholder={this.state.gameSpeed} onChange={(e) => this.onSpeedChange(e)} />
+            </div>
           </div>
           <div className="Buttons">
             Max Score: {this.state.maxScore}

@@ -54,6 +54,26 @@
   background: #dc1b1b;
 }
 
+.LabelAndInput {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 1em;
+}
+
+label {
+  font-size: .8em;
+  display: flex;
+  margin-bottom: .5em;
+}
+
+input {
+  width: 6em;
+  font-size: .7em;
+  display: flex;
+}
+
 .Buttons {
   display: flex;
   margin-top: 2em;
