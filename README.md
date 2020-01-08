@@ -1,3 +1,7 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/82e7d5ce-f200-459e-9294-5c7ffd307c11/deploy-status)](https://app.netlify.com/sites/snake-game-ai/deploys)
+
+Click on the image above to view a live build of this project.
+
 This project was created with react, and it features the classic computer game snake.
 
 The user has the ability to choose game speed, various modifiers that build on the original game, and even watch an AI attempt to win the game.
